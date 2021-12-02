@@ -14,8 +14,14 @@ class EspeakPhonemesPlugin(Grapheme2PhonemePlugin):
 
     def get_espeak_phonemes(self, sentence, lang):
         args = [self.espeak_bin, '-q', '-x', '--ipa', '-v', lang, sentence]
-        phonemes = subprocess.check_output(args).decode("utf-8")
-        return [p for p in phonemes if p in ipa2arpabet]
+        phonemes = []
+        for pho in subprocess.check_output(args).decode("utf-8").\
+                replace(" ", "ˈ").replace("ː", "ˈ").replace('̃', "").strip().split("ˈ"):
+            if pho in ipa2arpabet:
+                phonemes.append(pho)
+            else:
+                phonemes += list(pho)
+        return phonemes
 
     def get_ipa(self, word, lang):
         return self.get_espeak_phonemes(word, lang)
